@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up / Login</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  :root {
+    --cyan:   #00f0ff;
+    --pink:   #ff3cac;
+    --purple: #6c2fff;
+    --green:  #00ffaa;
+    --glass-bg:     rgba(255,255,255,0.045);
+    --glass-border: rgba(255,255,255,0.11);
+    --text:   #ddeeff;
+    --muted:  rgba(190,215,255,0.48);
+  }
+ 
+  html, body {
+    height: 100%; overflow: hidden;
+    background: #060a14;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+  }
+ 
+  canvas { position: fixed; inset: 0; z-index: 0; }
+ 
+  .orb { position:fixed;border-radius:50%;filter:blur(100px);opacity:.16;animation:drift 16s ease-in-out infinite alternate;z-index:1; }
+  .orb-1{width:500px;height:500px;background:var(--purple);top:-180px;left:-140px;animation-delay:0s}
+  .orb-2{width:400px;height:400px;background:var(--cyan);bottom:-150px;right:-80px;animation-delay:-6s}
+  .orb-3{width:300px;height:300px;background:var(--pink);top:38%;left:52%;animation-delay:-10s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(28px,36px) scale(1.07)}}
+ 
+  .grid{position:fixed;inset:0;z-index:1;background-image:linear-gradient(rgba(0,240,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,.035) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 78% 68% at 50% 50%,black 20%,transparent 100%)}
+ 
+  .particles{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+  .particle{position:absolute;width:2px;height:2px;border-radius:50%;animation:floatUp linear infinite;opacity:0}
+  @keyframes floatUp{0%{transform:translateY(100vh);opacity:0}10%{opacity:.55}90%{opacity:.3}100%{transform:translateY(-8vh) translateX(30px);opacity:0}}
+ 
+  .cursor-glow{position:fixed;pointer-events:none;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(0,240,255,.08) 0%,transparent 70%);transform:translate(-50%,-50%);z-index:5;transition:left .07s,top .07s}
+ 
+  .scene{position:relative;z-index:10;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+ 
+  .card{
+    width:100%;max-width:424px;
+    padding:38px 36px 34px;
+    border-radius:22px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(30px) saturate(160%);
+    -webkit-backdrop-filter:blur(30px) saturate(160%);
+    box-shadow:0 0 0 1px rgba(0,240,255,.05),0 28px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.09);
+    animation:cardIn .8s cubic-bezier(.16,1,.3,1) both;
+    position:relative;overflow:hidden;
+  }
+  .card::before{content:'';position:absolute;top:0;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent);opacity:.5;animation:shimmer 3.5s ease-in-out infinite}
+  @keyframes shimmer{0%,100%{opacity:.25}50%{opacity:.8}}
+  @keyframes cardIn{from{opacity:0;transform:translateY(36px) scale(.95)}to{opacity:1;transform:none}}
+ 
+  /* tabs */
+  .tabs{display:flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:4px;margin-bottom:26px;position:relative;animation:fadeUp .6s .1s both}
+  .tab-slider{position:absolute;top:4px;bottom:4px;width:calc(50% - 4px);border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--purple));transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 16px rgba(0,240,255,.28)}
+  .tabs.login-active .tab-slider{transform:translateX(100%)}
+  .tab-btn{flex:1;position:relative;z-index:1;padding:9px 0;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;letter-spacing:.03em;color:rgba(200,220,255,.45);transition:color .25s;border-radius:9px}
+  .tab-btn.active{color:#050e20;font-weight:600}
+ 
+  /* headings */
+  .heading{font-family:'DM Serif Display',serif;font-size:1.65rem;font-weight:400;line-height:1.18;margin-bottom:5px;animation:fadeUp .6s .18s both}
+  .heading em{font-style:italic;color:var(--cyan)}
+  .sub{font-size:.86rem;font-weight:300;color:var(--muted);margin-bottom:24px;line-height:1.5;animation:fadeUp .6s .26s both}
+ 
+  .panel{transition:opacity .28s,transform .28s}
+  .panel.hidden{display:none}
+ 
+  .form{display:flex;flex-direction:column;gap:13px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;animation:fadeUp .5s .34s both}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field:nth-child(1){animation:fadeUp .5s .34s both}
+  .field:nth-child(2){animation:fadeUp .5s .40s both}
+  .field:nth-child(3){animation:fadeUp .5s .46s both}
+  .field:nth-child(4){animation:fadeUp .5s .52s both}
+ 
+  label{font-size:.7rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+ 
+  .input-wrap{position:relative;display:flex;align-items:center}
+  .ico{position:absolute;left:12px;width:15px;height:15px;color:rgba(180,210,255,.3);pointer-events:none;transition:color .25s}
+ 
+  input{width:100%;padding:11px 12px 11px 36px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:400;outline:none;transition:border-color .25s,box-shadow .25s,background .25s}
+  input::placeholder{color:rgba(180,210,255,.22);font-weight:300}
+  input:focus{border-color:rgba(0,240,255,.55);background:rgba(0,240,255,.04);box-shadow:0 0 0 3px rgba(0,240,255,.1),0 0 14px rgba(0,240,255,.08)}
+  .input-wrap:has(input:focus) .ico{color:var(--cyan)}
+ 
+  .s-bar{display:flex;gap:4px;margin-top:4px}
+  .s-bar span{flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.09);transition:background .4s}
+  .s-bar span.s1{background:var(--pink)}.s-bar span.s2{background:#ffaa00}.s-bar span.s3{background:var(--cyan)}.s-bar span.s4{background:var(--green)}
+ 
+  .forgot{text-align:right;margin-top:-4px;font-size:.78rem;color:var(--muted)}
+  .forgot a{color:var(--cyan);text-decoration:none;transition:opacity .2s}.forgot a:hover{opacity:.7}
+ 
+  .btn{position:relative;width:100%;padding:13px;margin-top:2px;border:none;border-radius:11px;cursor:pointer;overflow:hidden;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.05em;color:#040c1a;background:linear-gradient(135deg,var(--cyan) 0%,var(--purple) 100%);transition:transform .18s,box-shadow .18s;animation:fadeUp .5s .58s both}
+  .btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--green),var(--cyan));opacity:0;transition:opacity .3s}
+  .btn::after{content:'';position:absolute;top:-100%;left:0;right:0;height:100%;background:linear-gradient(transparent,rgba(255,255,255,.13),transparent);animation:scanBtn 2.8s linear infinite}
+  @keyframes scanBtn{from{top:-100%}to{top:200%}}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,240,255,.28)}.btn:hover::before{opacity:1}.btn:active{transform:none}
+  .btn span{position:relative;z-index:1}
+ 
+  .divider{display:flex;align-items:center;gap:10px;font-size:.74rem;font-weight:300;color:var(--muted);letter-spacing:.06em;animation:fadeUp .5s .64s both}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.09)}
+ 
+  .socials{display:flex;gap:9px;animation:fadeUp .5s .70s both}
+  .soc-btn{flex:1;padding:9px 0;border-radius:10px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.035);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s,border-color .2s,color .2s}
+  .soc-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2);color:var(--text)}
+  .soc-btn svg{width:14px;height:14px}
+ 
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+ 
+<canvas id="c"></canvas>
+<div class="grid"></div>
+<div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+<div class="particles" id="particles"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+ 
+<div class="scene">
+ <div class="card">
+ 
+  <!-- Tabs -->
+  <div class="tabs" id="tabs">
+   <div class="tab-slider"></div>
+   <button class="tab-btn active" id="tabSignup" onclick="switchTab('signup')">Create Account</button>
+   <button class="tab-btn"        id="tabLogin"  onclick="switchTab('login')">Sign In</button>
+  </div>
+ 
+  <!-- SIGNUP -->
+  <div id="panelSignup" class="panel">
+   <h1 class="heading">Welcome <em>aboard</em></h1>
+   <p class="sub">Create your account to get started.</p>
+   <div class="form">
+    <div class="row">
+     <div class="field">
+      <label>First name</label>
+      <div class="input-wrap">
+       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+       <input type="text" placeholder="Aria">
+      </div>
+     </div>
+     <div class="field">
+      <label>Last name</label>
+      <div class="input-wrap">
+       <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+       <input type="text" placeholder="Nova">
+      </div>
+     </div>
+    </div>
+    <div class="field">
+     <label>Email address</label>
+     <div class="input-wrap">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <input type="email" placeholder="aria@mail.com">
+     </div>
+    </div>
+    <div class="field">
+     <label>Password</label>
+     <div class="input-wrap">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <input type="password" placeholder="Create a strong password" id="passInput">
+     </div>
+     <div class="s-bar" id="sBar"><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="field">
+     <label>Confirm password</label>
+     <div class="input-wrap">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <input type="password" placeholder="Repeat password">
+     </div>
+    </div>
+    <button class="btn"><span>Create account</span></button>
+    <div class="divider">or continue with</div>
+    <div class="socials">
+     <button class="soc-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google</button>
+     <button class="soc-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> GitHub</button>
+    </div>
+   </div>
+  </div>
+ 
+  <!-- LOGIN -->
+  <div id="panelLogin" class="panel hidden">
+   <h1 class="heading">Good to see <em>you</em></h1>
+   <p class="sub">Sign in to continue your journey.</p>
+   <div class="form">
+    <div class="field">
+     <label>Email address</label>
+     <div class="input-wrap">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <input type="email" placeholder="your@email.com">
+     </div>
+    </div>
+    <div class="field">
+     <label>Password</label>
+     <div class="input-wrap">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <input type="password" placeholder="Your password">
+     </div>
+    </div>
+    <div class="forgot"><a href="#">Forgot password?</a></div>
+    <button class="btn"><span>Sign in</span></button>
+    <div class="divider">or sign in with</div>
+    <div class="socials">
+     <button class="soc-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Google</button>
+     <button class="soc-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> GitHub</button>
+    </div>
+   </div>
+  </div>
+ 
+ </div>
+</div>
+ 
+<script>
+const glow = document.getElementById('cursorGlow');
+document.addEventListener('mousemove', e => { glow.style.left=e.clientX+'px'; glow.style.top=e.clientY+'px'; });
+ 
+const pWrap=document.getElementById('particles');
+const COLS=['#00f0ff','#6c2fff','#ff3cac','#00ffaa'];
+for(let i=0;i<50;i++){
+  const p=document.createElement('div'); p.className='particle';
+  p.style.cssText=`left:${Math.random()*100}vw;width:${Math.random()*2+1}px;height:${Math.random()*2+1}px;background:${COLS[Math.floor(Math.random()*4)]};animation-duration:${Math.random()*18+10}s;animation-delay:${Math.random()*14}s`;
+  pWrap.appendChild(p);
+}
+ 
+const passEl=document.getElementById('passInput');
+const bars=document.querySelectorAll('#sBar span');
+passEl.addEventListener('input',()=>{
+  const v=passEl.value; let s=0;
+  if(v.length>=6)s++; if(v.length>=10)s++;
+  if(/[A-Z]/.test(v)&&/[0-9]/.test(v))s++;
+  if(/[^A-Za-z0-9]/.test(v))s++;
+  bars.forEach((b,i)=>{b.className='';if(i<s)b.classList.add('s'+s);});
+});
+ 
+let cur='signup';
+function switchTab(tab){
+  if(tab===cur) return; cur=tab;
+  const tabs=document.getElementById('tabs');
+  const pS=document.getElementById('panelSignup');
+  const pL=document.getElementById('panelLogin');
+  const tS=document.getElementById('tabSignup');
+  const tL=document.getElementById('tabLogin');
+  const outEl  = tab==='login' ? pS : pL;
+  const inEl   = tab==='login' ? pL : pS;
+  if(tab==='login'){ tabs.classList.add('login-active'); tS.classList.remove('active'); tL.classList.add('active'); }
+  else             { tabs.classList.remove('login-active'); tL.classList.remove('active'); tS.classList.add('active'); }
+  outEl.style.cssText='opacity:0;transform:translateY(-10px);transition:opacity .22s,transform .22s';
+  setTimeout(()=>{
+    outEl.classList.add('hidden');
+    inEl.classList.remove('hidden');
+    inEl.style.cssText='opacity:0;transform:translateY(10px);transition:none';
+    requestAnimationFrame(()=>{ inEl.style.cssText='opacity:1;transform:translateY(0);transition:opacity .28s,transform .28s'; });
+  },220);
+}
+ 
+const canvas=document.getElementById('c'), ctx=canvas.getContext('2d');
+let W,H,nodes;
+function resize(){
+  W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight;
+  nodes=Array.from({length:55},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.38,vy:(Math.random()-.5)*.38,r:Math.random()*1.6+.4}));
+}
+resize(); window.addEventListener('resize',resize);
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  nodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;});
+  for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
+    const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.hypot(dx,dy);
+    if(d<125){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(0,240,255,${.11*(1-d/125)})`;ctx.lineWidth=.55;ctx.stroke();}
+  }
+  nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle='rgba(0,240,255,.5)';ctx.fill();});
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
