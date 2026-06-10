@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Add to Cart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+       
+        .btn-container {
+            position: relative;
+            width: 260px;
+            height: 70px;
+            padding: 2px;
+            border-radius: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        
+        .btn-container:hover {
+            transform: scale(1.03);
+        }
+
+        
+        .btn-container::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 400%;
+           
+            background: conic-gradient(
+                transparent, 
+                #a855f7, 
+                #ec4899, 
+                #f97316, 
+                #06b6d4, 
+                transparent 40%
+            );
+            animation: rotate 4s linear infinite;
+        }
+
+        
+        .btn-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            border-radius: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            color: white;
+            font-size: 20px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            user-select: none;
+        }
+
+        
+        .btn-content i {
+            margin-right: 12px;
+            font-size: 18px;
+            /* Subtly thinner look to match the "Add To Cart" text */
+            -webkit-font-smoothing: antialiased;
+        }
+
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="btn-container">
+        <div class="btn-content">
+            <i class="fa-solid fa-cart-shopping"></i>
+            Add To Cart
+        </div>
+    </div>
+
+</body>
+</html>
