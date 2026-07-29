@@ -6,7 +6,7 @@
 
 ## Preview 
 
-<video src="./preview.mp4" controls width="400"></video>
+<img src="./preview.gif" width="400px" >
 
 ## Features
 
